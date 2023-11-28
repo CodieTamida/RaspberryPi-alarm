@@ -51,7 +51,7 @@ def alarm_start_time(scheduled_time):
 			break
 		time.sleep(1)
 		
-scheduled_time = datetime.now().replace(hour =22, minute = 25, second = 20, microsecond = 0)
+scheduled_time = datetime.now().replace(hour =22, minute = 40, second = 20, microsecond = 0)
 
 def blinking_light():
 	while True:
