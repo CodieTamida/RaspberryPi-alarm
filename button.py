@@ -9,7 +9,9 @@ from datetime import datetime
 pygame.init()
 pygame.mixer.init()
 
-pygame.mixer.music.load("/home/codie/Desktop/RaspberryPi-alarm/EarlyRiser.mp3")
+#pygame.mixer.music.load("/home/codie/Desktop/RaspberryPi-alarm/EarlyRiser.mp3")
+pygame.mixer.music.load("EarlyRiser.mp3")
+
 
 
 yellowLed = 17
