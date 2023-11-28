@@ -10,51 +10,37 @@ pygame.init()
 pygame.mixer.init()
 
 pygame.mixer.music.load("/home/codie/Desktop/RaspberryPi-alarm/EarlyRiser.mp3")
-#pygame.mixer.music.play()
 
 
 yellowLed = 17
-BUTTON_PIN = 16
+SNOOZE_PIN = 16
+STOP_PIN = 20
 
 GPIO.setmode(GPIO.BCM)
 
 GPIO.setup(yellowLed, GPIO.OUT)
-GPIO.setup(BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(SNOOZE_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(STOP_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-button_press_count= 0
-last_press = None
 alarm_on = True
 
-
-def button_press(channel):
-	global button_press_count, last_press, alarm_on
-	
-	if last_press and (datetime.now() - last_press).total_seconds() < 4:
-		button_press_count += 1
-	else:
-		button_press_count =  1
-		
-	last_press = datetime.now()
-	
-	print("this is count before sleep: ", button_press_count)
-	print(button_press_count)
-	if button_press_count == 1:
-		print(pygame.mixer.music.get_busy())
-		if pygame.mixer.music.get_busy():
-			print(pygame.mixer.music.get_busy())
-			pygame.mixer.music.stop()
-			print("Alarm is Stopped, detecting Snoze or Off")
-			time.sleep(15)
-			if alarm_on:
-				pygame.mixer.music.play()
-
-	elif button_press_count > 1:
+def snooze_button(channel):
+	if pygame.mixer.music.get_busy():
 		pygame.mixer.music.stop()
-		alarm_on = False
-		print("Alarm is Stopped")
+		print("The Alarm is Snoozed")
+		time.sleep(15)
+		if alarm_on:
+			pygame.mixer.music.play()
+			
+def stop_button(channel):
+	global alarm_on
+	pygame.mixer.music.stop()
+	alarm_on = False
+	print("The alarm has been shut off")
+	
+GPIO.add_event_detect(SNOOZE_PIN, GPIO.FALLING, callback=snooze_button, bouncetime=200)
+GPIO.add_event_detect(STOP_PIN, GPIO.FALLING, callback=stop_button, bouncetime=200)
 
-	print("does the function end")
-GPIO.add_event_detect(BUTTON_PIN, GPIO.FALLING, callback=button_press, bouncetime=500)
 
 def alarm_start_time(scheduled_time):
 	global alarm_on
@@ -65,7 +51,7 @@ def alarm_start_time(scheduled_time):
 			break
 		time.sleep(1)
 		
-scheduled_time = datetime.now().replace(hour =18, minute = 59, second = 20, microsecond = 0)
+scheduled_time = datetime.now().replace(hour =22, minute = 25, second = 20, microsecond = 0)
 
 def blinking_light():
 	while True:
@@ -77,6 +63,10 @@ def blinking_light():
 try:
 	alarm_start_time(scheduled_time)
 	blinking_light()
+	
+	while alarm_on:
+		time.sleep(.1)
+	
 except KeyboardInterrupt:
 			
 	GPIO.cleanup()
